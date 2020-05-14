@@ -3,6 +3,14 @@ import { Router } from '@angular/router';
 import { FlexModalService } from '../shared-components/flex-modal/flex-modal.service';
 import { Http } from '@angular/http';
 
+export interface IOrder {
+  pid?: string;
+  image?: string;
+  description?: string;
+  price?: number;
+  quantity?: number;
+}
+
 @Component({
   selector: 'app-orders',
   templateUrl: './orders.component.html',
@@ -11,117 +19,142 @@ import { Http } from '@angular/http';
 
 export class OrdersComponent implements OnInit {
 
-  orders: Array<any> = [];
-  name: string;
+  orders: Array<IOrder> = [];
   errorMessage = '';
   confirmMessage = '';
+  name = '';
   constructor(
     private router: Router,
     private flexModal: FlexModalService,
     private http: Http
   ) {
-
   }
 
   async ngOnInit() {
-    this.loadDefaultOrders();
+
   }
 
-  calculate() {
-    const total = this.orders.reduce((inc, item, i, arr) => {
-      inc += item.price * item.quantity;
-      return inc;
-    }, 0);
-    const taxAmount = total * .1;
-    const subTotal = total - taxAmount;
-    return {
-      total: total,
-      taxAmount: taxAmount,
-      subTotal: subTotal
+  // prepare result, splice last name, first name
+  validate(name: string, total: number, taxAmount: number, subTotal: number) {
+    this.errorMessage = '';
+    if (!total) {
+      this.errorMessage = 'Must execute calculation!';
     }
-  }
+    if (name === '') {
+      this.errorMessage = 'Name must not be empty!';
 
-  submit() {
-    const commaIndex = this.name.indexOf(', ');
-    console.log('this.name', this.name, 'comma index', commaIndex);
-    let error = false;
-
-
-    if (this.name === '') {
-      console.log('Name must not be empty');
-      this.errorMessage = 'Name must not be empty';
-      error = true;
-      else if (commaIndex === -1) {
-        this.errorMessage = 'Name must have comma';
-        error = true;
-      }
+    } else if (name.indexOf(', ') === -1) {
+      this.errorMessage = 'Name must have a comma and a space!';
     }
-    if (!error) {
-      const firstName = this.name.slice(commaIndex + 1, this.name.length);
-      const lastName = this.name.slice(0, commaIndex);
-      const fullName = firstName + ' ' + lastName;
-      const calculation = this.calculate();
-      this.confirmMessage = `Thank you for your order ${fullName}. Your sub total is ${calculation.subTotal}. Your tax amount is ${calculation.taxAmount}. Your total is ${calculation.total}`;
-      this.flexModal.openDialog('confirm-modal');
+
+    if (this.errorMessage.length > 0) {
+      return false;
     } else {
-      this.flexModal.openDialog('error-modal');
+      return true;
+    }
+
+
+  }
+
+  showMessage(modalID: string) {
+    this.flexModal.openDialog(modalID);
+  }
+  // Calculate total and perform input validation
+  calculateTotal() {
+    const subTotal = this.orders.reduce((acc: number, item: IOrder) => {
+      acc += item.quantity * item.price;
+      return acc;
+    }, 0);
+    const taxAmount = subTotal * .1;
+    const total = subTotal + taxAmount;
+    const validated = this.validate(this.name, total, taxAmount, subTotal);
+    if (!validated) {
+      this.showMessage('error-modal');
+    } else {
+      this.confirmMessage = this.setSuccessMessage(this.name, total, taxAmount, subTotal);
+      this.showMessage('confirm-modal');
     }
   }
 
-  loadDefaultOrders() {
+
+  setSuccessMessage(name: string, total: number, taxAmount: number, subTotal: number) {
+    let output = '';
+    const commaIndex = name.indexOf(', ');
+    const firstName = name.slice(commaIndex, name.length);
+    const lastName = name.slice(0, commaIndex);
+    output = `Thank you for your order ${firstName} ${lastName}
+      Your subtotal is: $${subTotal}, your tax amount is: $${taxAmount} and your grand total is: $${total}.`;
+    return output;
+  }
+  // display the order form with orders from orders.json
+  displayOrder() {
     this.orders = [{
       'pid': '1',
-      'image': 'assets/sm_android.jpeg',
-      'description': 'Android',
-      'price': 150.00,
+      'image': 'assets/sm_jordan.jpeg',
+      'description': 'Jordan 1',
+      'price': 170.00,
       'quantity': 2
     }, {
       'pid': '2',
-      'image': 'assets/sm_iphone.jpeg',
-      'description': 'Iphone',
-      'price': 200.00,
+      'image': 'assets/sm_yeezy.jpeg',
+      'description': 'yeezy 350',
+      'price': 220.00,
       'quantity': 1
     }, {
       'pid': '3',
-      'image': 'assets/sm_windows.jpeg',
-      'description': 'Windows phone',
-      'price': 110.00,
+      'image': 'assets/sm_am.jpeg',
+      'description': 'AM 270',
+      'price': 150.00,
       'quantity': 2
     }];
   }
-
-  delete(index: number) {
-    this.orders.splice(index, 1);
+  // Clear the orders form
+  clear() {
+   this.orders = [];
+    this.orders.map((item: IOrder, i: number) => {
+      Object.keys(item).map((key: string) => {
+        if (key !== 'image') {
+          item[key] = '';
+        }
+        return item;
+      });
+    });
   }
-
   addItem(item: string) {
     switch (item) {
       case 'Android':
         this.orders.unshift({
           'pid': '1',
-          'image': 'assets/sm_android.jpeg',
-          'description': 'Android',
-          'price': 150.00,
-          'quantity': 0
+          'image': 'assets/sm_jordan.jpeg',
+          'description': 'Jordan 1',
+          'price': 170.00,
+          'quantity': 1
         });
         break;
-      case 'Iphone':
+      case 'IPhone':
         this.orders.unshift({
           'pid': '2',
-          'image': 'assets/sm_iphone.jpeg',
-          'description': 'Iphone',
-          'price': 200.00,
-          'quantity': 0
+          'image': 'assets/sm_yeezy.jpeg',
+          'description': 'yeezy 350',
+          'price': 220.00,
+          'quantity': 1
         });
         break;
       case 'Windows Phone':
         this.orders.unshift({
           'pid': '3',
-          'image': 'assets/sm_windows.jpeg',
-          'description': 'Large Windows Phone',
-          'price': 110.00,
-          'quantity': 0
+          'image': 'assets/sm_am.jpeg',
+          'description': 'AM 270',
+          'price': 150.00,
+          'quantity': 1
         });
         break;
     }
   }
+  // delete line item (order) when delete button is click
+  delete(index: number) {
+    this.orders.splice(index, 1);
+  }
+  // read in the orders.json file and populate the list table with the initial orders (3)
+
+}

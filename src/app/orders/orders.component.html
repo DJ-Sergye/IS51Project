@@ -6,9 +6,9 @@
     </div>
     <mat-toolbar class="action-bar" color="accent">
       <div class="align-right">
-        <button mat-raised-button (click)="addItem('android')">Add Android</button>
-        <button mat-raised-button (click)="addItem('iphone')">Add Iphone</button>
-        <button mat-raised-button (click)="addItem('windows phone')">Add Windows phone</button>
+        <button mat-raised-button (click)="addItem('Android')">+ Jordan 1</button>
+        <button mat-raised-button (click)="addItem('IPhone')">+ Yeezy 350</button>
+        <button mat-raised-button (click)="addItem('Windows Phone')">+ AM 270</button>
       </div>
     </mat-toolbar>
     <div class="table-grid">
@@ -29,19 +29,19 @@
         <tbody>
           <tr *ngFor="let order of orders; let i = index">
             <td><img class="item-image" [src]="order.image" alt="img"></td>
-            <td><input [(ngModel)]="order.pid" type="text" class="form-control" placeholder="PID"></td>
-            <td><input [(ngModel)]="order.description" type="text" class="form-control" placeholder="Description"></td>
-            <td><input [(ngModel)]="order.price" type="text" class="form-control" placeholder="Price"></td>
-            <td><input [(ngModel)]="order.quantity" type="text" class="form-control" placeholder="Quantity"></td>
-            <td><button (click)="delete(i)" mat-raised-button color="primary" color="accent"><mat-icon>delete</mat-icon></button></td>
+            <td><input type="text" [(ngModel)]="order.pid" class="form-control" placeholder="PID"></td>
+            <td><input type="text" [(ngModel)]="order.description" class="form-control" placeholder="Description"></td>
+            <td><input type="text" [(ngModel)]="order.price" class="form-control" placeholder="Price"></td>
+            <td><input type="text" [(ngModel)]="order.quantity" class="form-control" placeholder="Quantity"></td>
+            <td><button mat-raised-button color="primary" color="accent" (click)="delete(i)"><mat-icon>delete</mat-icon></button></td>
           </tr>
         </tbody>
       </table>
     </div>
     <div class="action-container">
-      <button mat-raised-button color="primary" (click)="loadDefaultOrders()">Load Saved Items</button>
-      <button mat-raised-button color="primary">Clear</button>
-      <button mat-raised-button color="primary" (click)="submit()">Submit</button>
+      <button mat-raised-button color="primary" (click)="displayOrder()">Load Saved Items</button>
+      <button mat-raised-button color="primary" (click)="clear()">Clear</button>
+      <button mat-raised-button color="primary" (click)="calculateTotal()">Submit</button>
     </div>
   </mat-card>
 </div>
